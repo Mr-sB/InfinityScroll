@@ -9,15 +9,8 @@ namespace InfinityScroll
     [RequireComponent(typeof(RectTransform))]
     public class UIList : MonoBehaviour
     {
-        public ObjectPool.LoadMode LoadMode;
-        public string PrefabPath;
-        public float PreferredWidth;
-        public float PreferredHeight;
-        public event Action<int, RectTransform> OnItemCreated;
-        public event Action<int> OnItemHided;
-
-        private ScrollRect m_ScrollRect;
-        private VirtualLayoutGroup m_VirtualLayout;
+        public ScrollRect ScrollRect { private set; get; }
+        public VirtualLayoutGroup VirtualLayout { private set; get; }
         private RectTransform m_ContentTrans;
         private RectTransform m_RectTransform;
         private Vector3[] mContentCorners = new Vector3[4];
@@ -26,19 +19,26 @@ namespace InfinityScroll
         private Vector2 mPrevPos = Vector2.zero;
         private Vector2 mPrevSize = Vector2.zero;
         private bool mLayoutChange;
+        
+        public ObjectPool.LoadMode LoadMode;
+        public string PrefabPath;
+        public float PreferredWidth;
+        public float PreferredHeight;
+        public event Action<int, RectTransform> OnItemCreated;
+        public event Action<int> OnItemHided;
 
         private void Awake()
         {
             m_RectTransform = transform as RectTransform;
-            m_ScrollRect = GetComponentInParent<ScrollRect>();
-            if (m_ScrollRect != null)
-                m_ContentTrans = m_ScrollRect.content;
+            ScrollRect = GetComponentInParent<ScrollRect>();
+            if (ScrollRect != null)
+                m_ContentTrans = ScrollRect.content;
 
-            m_VirtualLayout = GetComponent<VirtualLayoutGroup>();
-            if (m_VirtualLayout != null)
+            VirtualLayout = GetComponent<VirtualLayoutGroup>();
+            if (VirtualLayout != null)
             {
-                m_VirtualLayout.SetCallback(OnUnbind, OnLayoutChange);
-                m_ScrollRect.onValueChanged.AddListener(OnContentPosChange);
+                VirtualLayout.SetCallback(OnUnbind, OnLayoutChange);
+                ScrollRect.onValueChanged.AddListener(OnContentPosChange);
             }
             
             InitSize();
@@ -59,7 +59,7 @@ namespace InfinityScroll
             if (childCount < 1) return;
             for (int i = childCount - 1; i > -1; i--)
                 ObjectPool.Instance.DisposeGameObject(m_RectTransform.GetChild(i).gameObject);
-            m_ScrollRect = null;
+            ScrollRect = null;
         }
         
         public void InitListView(int len)
@@ -69,12 +69,12 @@ namespace InfinityScroll
             while (childCount-- > 0)
                 ObjectPool.Instance.DisposeGameObject(m_RectTransform.GetChild(childCount).gameObject);
 
-            m_VirtualLayout.InitChildren(len, PreferredWidth, PreferredHeight);
+            VirtualLayout.InitChildren(len, PreferredWidth, PreferredHeight);
         }
         
         public RectTransform GetItem(int index)
         {
-            if (m_VirtualLayout != null)
+            if (VirtualLayout != null)
             {
                 return mVisibleItems.TryGetValue(index, out var trans) ? trans : null;
             }
@@ -107,9 +107,9 @@ namespace InfinityScroll
                 return;
             }
 
-            if (m_VirtualLayout != null)
+            if (VirtualLayout != null)
             {
-                m_VirtualLayout.ChangeChildrenCount(len, PreferredWidth, PreferredHeight);
+                VirtualLayout.ChangeChildrenCount(len, PreferredWidth, PreferredHeight);
                 UpdateChildVisible();
                 return;
             }
@@ -137,7 +137,7 @@ namespace InfinityScroll
                 ObjectPool.Instance.DisposeGameObject(m_RectTransform.GetChild(i).gameObject);
             }
 
-            m_ScrollRect = null;
+            ScrollRect = null;
         }
 
         private GameObject CreateItem()
@@ -207,7 +207,7 @@ namespace InfinityScroll
             if (!mVisibleItems.TryGetValue(index, out var rect)) return;
             if (rect != null)
             {
-                m_VirtualLayout.UnBindChild(index);
+                VirtualLayout.UnBindChild(index);
                 ObjectPool.Instance.DisposeGameObject(rect.gameObject);
             }
 
@@ -231,7 +231,7 @@ namespace InfinityScroll
 
             rect.SetParent(m_RectTransform);
             rect.transform.localScale = Vector3.one;
-            m_VirtualLayout.BindChild(idx, rect);
+            VirtualLayout.BindChild(idx, rect);
             mVisibleItems.Add(idx, rect);
             if (OnItemCreated != null)
             {
@@ -251,26 +251,26 @@ namespace InfinityScroll
 
         private void UpdateChildVisible()
         {
-            if (m_ScrollRect == null || m_ScrollRect.viewport == null || m_ContentTrans == null ||
-                m_VirtualLayout == null)
+            if (ScrollRect == null || ScrollRect.viewport == null || m_ContentTrans == null ||
+                VirtualLayout == null)
             {
                 return;
             }
 
-            RectTransform viewport = m_ScrollRect.viewport;
+            RectTransform viewport = ScrollRect.viewport;
             viewport.GetWorldCorners(mViewportCorners);
             m_RectTransform.GetLocalCorners(mContentCorners);
             Vector3 vector = transform.InverseTransformPoint(mViewportCorners[0]);
             Vector3 vector2 = transform.InverseTransformPoint(mViewportCorners[2]);
             Rect other = new Rect(vector.x - mContentCorners[0].x, vector.y - mContentCorners[2].y,
                 vector2.x - vector.x, vector2.y - vector.y);
-            int childCount = m_VirtualLayout.childCount;
+            int childCount = VirtualLayout.childCount;
             if(childCount <= 0 ) return;
             if (mVisibleItems.Count <= 0)
             {
                 for (int i = 0; i < childCount; i++)
                 {
-                    if(m_VirtualLayout.GetChildRect(i).Overlaps(other))
+                    if(VirtualLayout.GetChildRect(i).Overlaps(other))
                         OnItemShow(i);
                     else
                         OnItemHide(i);
@@ -290,23 +290,23 @@ namespace InfinityScroll
                 int endIndex = maxIndex;
                 for (; endIndex >= minIndex; endIndex--)
                 {
-                    if(m_VirtualLayout.GetChildRect(endIndex).Overlaps(other)) break;
+                    if(VirtualLayout.GetChildRect(endIndex).Overlaps(other)) break;
                     OnItemHide(endIndex);
                 }
                 for (int i = minIndex; i < endIndex; i++)
                 {
-                    if(m_VirtualLayout.GetChildRect(i).Overlaps(other)) break;
+                    if(VirtualLayout.GetChildRect(i).Overlaps(other)) break;
                     OnItemHide(i);
                 }
 
                 for (int i = maxIndex + 1; i < childCount; i++)
                 {
-                    if (!m_VirtualLayout.GetChildRect(i).Overlaps(other)) break;
+                    if (!VirtualLayout.GetChildRect(i).Overlaps(other)) break;
                     OnItemShow(i);
                 }
                 for (int i = minIndex - 1; i >= 0; i--)
                 {
-                    if (!m_VirtualLayout.GetChildRect(i).Overlaps(other)) break;
+                    if (!VirtualLayout.GetChildRect(i).Overlaps(other)) break;
                     OnItemShow(i);
                 }
             }
