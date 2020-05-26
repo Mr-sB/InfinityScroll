@@ -153,16 +153,17 @@ namespace InfinityScroll
         public abstract void SetLayoutHorizontal();
         public abstract void SetLayoutVertical();
 
-        public void ChangeChildrenCount(int cnt, float preferredWidth, float preferredHeight)
+        public void ChangeChildrenCount(int newCount, float preferredWidth, float preferredHeight)
         {
-            if (m_Children.Count == cnt)
+            int oldCount = childCount;
+            if (oldCount == newCount)
             {
                 return;
             }
 
-            if (cnt < m_Children.Count)
+            if (newCount < oldCount)
             {
-                for (int i = cnt; i < m_Children.Count; i++)
+                for (int i = newCount; i < oldCount; i++)
                 {
                     if (onChildUnbind != null)
                     {
@@ -173,13 +174,13 @@ namespace InfinityScroll
                     {
                         ObjectPool.Instance.DisposeGameObject(m_Children[i].rect.gameObject);
                     }
+                    CommonPool.Instance.Dispose(m_Children[i]);
                 }
-
-                m_Children.RemoveRange(cnt, m_Children.Count - cnt);
+                m_Children.RemoveRange(newCount, oldCount - newCount);
             }
             else
             {
-                for (int j = m_Children.Count; j < cnt; j++)
+                for (int j = oldCount; j < newCount; j++)
                 {
                     VirtualChild virtualChild = CommonPool.Instance.Get<VirtualChild>();
                     virtualChild.preferredHeight = preferredHeight;
