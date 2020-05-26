@@ -165,17 +165,14 @@ namespace InfinityScroll
             {
                 for (int i = newCount; i < oldCount; i++)
                 {
+                    VirtualChild virtualChild = m_Children[i];
                     if (onChildUnbind != null)
-                    {
-                        onChildUnbind(i, m_Children[i].rectTransform);
-                    }
+                        onChildUnbind(i, virtualChild.rectTransform);
 
-                    if (m_Children[i].rectTransform != null)
-                    {
-                        ObjectPool.Instance.DisposeGameObject(m_Children[i].rectTransform.gameObject);
-                    }
-                    m_Children[i].Clear();
-                    CommonPool.Instance.Dispose(m_Children[i]);
+                    if (virtualChild.rectTransform != null)
+                        ObjectPool.Instance.DisposeGameObject(virtualChild.rectTransform.gameObject);
+                    virtualChild.Clear();
+                    CommonPool.Instance.Dispose(virtualChild);
                 }
                 m_Children.RemoveRange(newCount, oldCount - newCount);
             }
@@ -197,13 +194,12 @@ namespace InfinityScroll
         {
             for (int i = 0; i < m_Children.Count; i++)
             {
-                if (m_Children[i].rectTransform != null)
-                {
-                    ObjectPool.Instance.DisposeGameObject(m_Children[i].rectTransform.gameObject);
-                }
+                VirtualChild virtualChild = m_Children[i];
+                if (virtualChild.rectTransform != null)
+                    ObjectPool.Instance.DisposeGameObject(virtualChild.rectTransform.gameObject);
 
-                m_Children[i].Clear();
-                CommonPool.Instance.Dispose(m_Children[i]);
+                virtualChild.Clear();
+                CommonPool.Instance.Dispose(virtualChild);
             }
 
             m_Children.Clear();
@@ -224,9 +220,7 @@ namespace InfinityScroll
             }
 
             if (corners == null)
-            {
                 corners = new Vector3[4];
-            }
 
             rectTransform.GetLocalCorners(corners);
             VirtualChild virtualChild = m_Children[idx];
