@@ -174,6 +174,7 @@ namespace InfinityScroll
                     {
                         ObjectPool.Instance.DisposeGameObject(m_Children[i].rectTransform.gameObject);
                     }
+                    m_Children[i].Clear();
                     CommonPool.Instance.Dispose(m_Children[i]);
                 }
                 m_Children.RemoveRange(newCount, oldCount - newCount);
