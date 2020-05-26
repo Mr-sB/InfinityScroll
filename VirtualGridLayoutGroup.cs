@@ -147,7 +147,7 @@ namespace InfinityScroll
             {
                 for (int index = 0; index < childCount; ++index)
                 {
-                    RectTransform rectChild = children[index].rect;
+                    RectTransform rectChild = children[index].rectTransform;
                     if (rectChild)
                     {
                         m_Tracker.Add((Object) this, rectChild,

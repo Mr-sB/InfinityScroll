@@ -260,20 +260,54 @@ namespace InfinityScroll
             RectTransform viewport = m_ScrollRect.viewport;
             viewport.GetWorldCorners(mViewportCorners);
             m_RectTransform.GetLocalCorners(mContentCorners);
-            Vector3 vector = base.transform.InverseTransformPoint(mViewportCorners[0]);
-            Vector3 vector2 = base.transform.InverseTransformPoint(mViewportCorners[2]);
+            Vector3 vector = transform.InverseTransformPoint(mViewportCorners[0]);
+            Vector3 vector2 = transform.InverseTransformPoint(mViewportCorners[2]);
             Rect other = new Rect(vector.x - mContentCorners[0].x, vector.y - mContentCorners[2].y,
                 vector2.x - vector.x, vector2.y - vector.y);
             int childCount = m_VirtualLayout.childCount;
-            for (int i = 0; i < childCount; i++)
+            if(childCount <= 0 ) return;
+            if (mVisibleItems.Count <= 0)
             {
-                if (m_VirtualLayout.GetChildRect(i).Overlaps(other))
+                for (int i = 0; i < childCount; i++)
                 {
+                    if(m_VirtualLayout.GetChildRect(i).Overlaps(other))
+                        OnItemShow(i);
+                    else
+                        OnItemHide(i);
+                }
+            }
+            else
+            {
+                int minIndex = int.MaxValue;
+                int maxIndex = int.MinValue;
+                foreach (var index in mVisibleItems.Keys)
+                {
+                    if (index < minIndex)
+                        minIndex = index;
+                    if (index > maxIndex)
+                        maxIndex = index;
+                }
+                int endIndex = maxIndex;
+                for (; endIndex >= minIndex; endIndex--)
+                {
+                    if(m_VirtualLayout.GetChildRect(endIndex).Overlaps(other)) break;
+                    OnItemHide(endIndex);
+                }
+                for (int i = minIndex; i < endIndex; i++)
+                {
+                    if(m_VirtualLayout.GetChildRect(i).Overlaps(other)) break;
+                    OnItemHide(i);
+                }
+
+                for (int i = maxIndex + 1; i < childCount; i++)
+                {
+                    if (!m_VirtualLayout.GetChildRect(i).Overlaps(other)) break;
                     OnItemShow(i);
                 }
-                else
+                for (int i = minIndex - 1; i >= 0; i--)
                 {
-                    OnItemHide(i);
+                    if (!m_VirtualLayout.GetChildRect(i).Overlaps(other)) break;
+                    OnItemShow(i);
                 }
             }
         }

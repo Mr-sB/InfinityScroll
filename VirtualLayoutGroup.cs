@@ -134,12 +134,12 @@ namespace InfinityScroll
                 return;
             }
 
-            if (m_Children[idx].rect != null && m_Children[idx].rect != rect && onChildUnbind != null)
+            if (m_Children[idx].rectTransform != null && m_Children[idx].rectTransform != rect && onChildUnbind != null)
             {
-                onChildUnbind(idx, m_Children[idx].rect);
+                onChildUnbind(idx, m_Children[idx].rectTransform);
             }
 
-            m_Children[idx].rect = rect;
+            m_Children[idx].rectTransform = rect;
             SetChildAlongAxis(m_Children[idx], 0, m_Children[idx].x, m_Children[idx].width);
             SetChildAlongAxis(m_Children[idx], 1, m_Children[idx].y, m_Children[idx].height);
         }
@@ -167,12 +167,12 @@ namespace InfinityScroll
                 {
                     if (onChildUnbind != null)
                     {
-                        onChildUnbind(i, m_Children[i].rect);
+                        onChildUnbind(i, m_Children[i].rectTransform);
                     }
 
-                    if (m_Children[i].rect != null)
+                    if (m_Children[i].rectTransform != null)
                     {
-                        ObjectPool.Instance.DisposeGameObject(m_Children[i].rect.gameObject);
+                        ObjectPool.Instance.DisposeGameObject(m_Children[i].rectTransform.gameObject);
                     }
                     CommonPool.Instance.Dispose(m_Children[i]);
                 }
@@ -196,9 +196,9 @@ namespace InfinityScroll
         {
             for (int i = 0; i < m_Children.Count; i++)
             {
-                if (m_Children[i].rect != null)
+                if (m_Children[i].rectTransform != null)
                 {
-                    ObjectPool.Instance.DisposeGameObject(m_Children[i].rect.gameObject);
+                    ObjectPool.Instance.DisposeGameObject(m_Children[i].rectTransform.gameObject);
                 }
 
                 m_Children[i].Clear();
@@ -247,10 +247,7 @@ namespace InfinityScroll
                 }));
                 return default(Rect);
             }
-
-            VirtualChild virtualChild = m_Children[idx];
-            return new Rect(virtualChild.x, -virtualChild.y - virtualChild.height, virtualChild.width,
-                virtualChild.height);
+            return m_Children[idx].rect;
         }
 
         /// <summary>
@@ -369,17 +366,17 @@ namespace InfinityScroll
                 child.y = pos;
             }
 
-            if (child.rect == null)
+            if (child.rectTransform == null)
             {
                 return;
             }
 
-            m_Tracker.Add(this, child.rect,
+            m_Tracker.Add(this, child.rectTransform,
                 DrivenTransformProperties.AnchoredPositionX | DrivenTransformProperties.AnchoredPositionY |
                 DrivenTransformProperties.AnchorMinX | DrivenTransformProperties.AnchorMinY |
                 DrivenTransformProperties.AnchorMaxX | DrivenTransformProperties.AnchorMaxY |
                 DrivenTransformProperties.SizeDeltaX | DrivenTransformProperties.SizeDeltaY);
-            child.rect.SetInsetAndSizeFromParentEdge((axis != 0) ? RectTransform.Edge.Top : RectTransform.Edge.Left,
+            child.rectTransform.SetInsetAndSizeFromParentEdge((axis != 0) ? RectTransform.Edge.Top : RectTransform.Edge.Left,
                 pos, size);
         }
 
@@ -419,7 +416,7 @@ namespace InfinityScroll
         public void UnBindChild(int index)
         {
             if (index < 0 || index >= childCount) return;
-            m_Children[index].rect = null;
+            m_Children[index].rectTransform = null;
         }
 
         //
@@ -429,7 +426,7 @@ namespace InfinityScroll
 
     public class VirtualChild
     {
-        public RectTransform rect;
+        public RectTransform rectTransform;
 
         public float x;
 
@@ -456,11 +453,16 @@ namespace InfinityScroll
             get { return new Vector2(width, height); }
         }
 
+        public Rect rect
+        {
+            get { return new Rect(x, -y - height, width, height); }
+        }
+
         public float GetMinSize(int axis)
         {
-            if (rect != null)
+            if (rectTransform != null)
             {
-                float minSize = LayoutElementUtil.GetMinSize(rect.gameObject, axis);
+                float minSize = LayoutElementUtil.GetMinSize(rectTransform.gameObject, axis);
                 if (minSize >= 0)
                 {
                     if (axis == 0)
@@ -481,9 +483,9 @@ namespace InfinityScroll
 
         public float GetPreferredSize(int axis)
         {
-            if (rect != null)
+            if (rectTransform != null)
             {
-                float preferredSize = LayoutElementUtil.GetPreferredSize(rect.gameObject, axis);
+                float preferredSize = LayoutElementUtil.GetPreferredSize(rectTransform.gameObject, axis);
                 if (preferredSize >= 0)
                 {
                     if (axis == 0)
@@ -504,9 +506,9 @@ namespace InfinityScroll
 
         public float GetFlexibleSize(int axis)
         {
-            if (rect != null)
+            if (rectTransform != null)
             {
-                float flexibleSize = LayoutElementUtil.GetFlexibleSize(rect.gameObject, axis);
+                float flexibleSize = LayoutElementUtil.GetFlexibleSize(rectTransform.gameObject, axis);
                 if (flexibleSize >= 0)
                 {
                     if (axis == 0)
@@ -527,7 +529,7 @@ namespace InfinityScroll
 
         public void Clear()
         {
-            rect = null;
+            rectTransform = null;
             minWidth = 0;
             minHeight = 0;
             preferredWidth = 0;
