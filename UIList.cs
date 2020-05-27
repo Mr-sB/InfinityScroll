@@ -268,16 +268,22 @@ namespace InfinityScroll
             if(childCount <= 0 ) return;
             if (mVisibleItems.Count <= 0)
             {
+                //减少遍历次数
+                bool hasVisibleItem = false;
                 for (int i = 0; i < childCount; i++)
                 {
-                    if(VirtualLayout.GetChildRect(i).Overlaps(other))
+                    if (VirtualLayout.GetChildRect(i).Overlaps(other))
+                    {
                         OnItemShow(i);
-                    else
-                        OnItemHide(i);
+                        hasVisibleItem = true;
+                    }
+                    else if(hasVisibleItem)
+                        break;
                 }
             }
             else
             {
+                //减少遍历次数
                 int minIndex = int.MaxValue;
                 int maxIndex = int.MinValue;
                 foreach (var index in mVisibleItems.Keys)
