@@ -182,8 +182,8 @@ namespace InfinityScroll
             float preferredHeight = -1;
             if (layoutElement != null)
             {
-                preferredWidth = layoutElement.flexibleWidth;
-                preferredHeight = layoutElement.flexibleHeight;
+                preferredWidth = layoutElement.preferredWidth;
+                preferredHeight = layoutElement.preferredHeight;
             }
 
             PreferredWidth = preferredWidth >= 0 ? preferredWidth : rect.sizeDelta.x;
