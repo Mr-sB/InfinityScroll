@@ -66,12 +66,14 @@ namespace InfinityScroll
             set { SetProperty(ref m_ConstraintCount, Mathf.Max(1, value)); }
         }
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             base.OnValidate();
             constraintCount = constraintCount;
         }
-
+#endif
+        
         /// <summary>
         ///   <para>Called by the layout system.</para>
         /// </summary>

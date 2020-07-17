@@ -204,11 +204,13 @@ namespace InfinityScroll
             flexible = Mathf.Max(flexible, 1f);
         }
 
+#if UNITY_EDITOR
         protected override void Reset()
         {
             base.Reset();
             m_ChildControlWidth = false;
             m_ChildControlHeight = false;
         }
+#endif
     }
 }
