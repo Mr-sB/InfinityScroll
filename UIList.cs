@@ -21,6 +21,7 @@ namespace InfinityScroll
         private bool mLayoutChange;
         
         public ObjectPool.LoadMode LoadMode;
+        public string PrefabBundleName;
         public string PrefabPath;
         public float PreferredWidth;
         public float PreferredHeight;
@@ -145,7 +146,7 @@ namespace InfinityScroll
             if (PrefabPath == null) return null;
 
             //加载
-            GameObject go = ObjectPool.Instance.Get<GameObject>(PrefabPath, LoadMode);
+            GameObject go = ObjectPool.Instance.Get<GameObject>(LoadMode, PrefabBundleName, PrefabPath);
             if (go != null)
             {
                 LayoutElement layoutElement = go.GetComponent<LayoutElement>();
