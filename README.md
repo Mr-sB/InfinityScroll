@@ -5,7 +5,7 @@ Infinity ScrollView for UGUI. It helps the UGUI ScrollRect to support any count 
 * Support any count items.
 * Support Vertical/Horizontal/Gride Layout Group.
 * Auto hide invisible items.
-* Use [ObjectPool](https://github.com/Mr-sB/ObjectPool) to cache items.
+* Use [ObjectPool](https://github.com/Mr-sB/ObjectPool)(Open source) to cache items.
 
 # Usage
 * Add `Virtual(Vertical/Horizontal/Gride)LayoutGroup` and `UIList` to the ScrollRect's content gameobject.
@@ -17,4 +17,4 @@ public event Action<int> OnItemHided;
 ```
 
 # Note
-You must import [ObjectPool](https://github.com/Mr-sB/ObjectPool) module.
+You must import [ObjectPool](https://github.com/Mr-sB/ObjectPool)(Open source) module.
